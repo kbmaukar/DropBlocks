@@ -115,12 +115,7 @@ class App extends Component {
         })
     })
 
-      
-
-      //Call smart contract uploadFile function 
-
   }
-
   //Set initial states
   constructor(props) {
     super(props)
