@@ -11,9 +11,33 @@ class Main extends Component {
           <main role="main" className="col-lg-12 ml-auto mr-auto" style={{ maxWidth: '1024px' }}>
             <div className="content">
               <p>&nbsp;</p>
-              <h1>Hello Web3.0</h1>
-              {/* Creatining uploading card ... */}
-                {/* Uploading file... */}
+
+              {/* Upload file card ... */}
+              <div className="card mb-3 mx-auto bg-dark" style={{ maxWidth: '512px' }}>
+                <h2 className="text-white text-monospace bg-dark"><b><ins>Share File</ins></b></h2>
+                  <form onSubmit={(event) => {
+                    event.preventDefault()
+                    const description = this.fileDescription.value
+                    this.props.uploadFile(description)
+                  }} >
+                      <div className="form-group">
+                        <br></br>
+                          <input
+                            id="fileDescription"
+                            type="text"
+                            ref={(input) => { this.fileDescription = input }}
+                            className="form-control text-monospace"
+                            placeholder="description..."
+                            required />
+                      </div>
+                    {/*  Get and prepare file for upload */}
+                    <input type="file" onChange={this.props.captureFile} className="text-white text-monospace"/>
+                    <button type="submit" className="btn-primary btn-block"><b>Upload!</b></button>
+                  </form>
+              </div>
+
+                {/* Uploading file... Prep file, upload to ipfs, store on blockchain */}
+
               <p>&nbsp;</p>
               {/* Create Table*/}
               <table className="table-sm table-bordered text-monospace" style={{ width: '1000px', maxHeight: '450px'}}>

@@ -3,8 +3,10 @@ import Navbar from './Navbar'
 import Main from './Main'
 import Web3 from 'web3';
 import './App.css';
+import DBlocks from '../abis/DBlocks.json'
 
-//Declare IPFS
+const ipfsClient = require('ipfs-http-client')
+const ipfs = ipfsClient({ host: 'ipfs.infura.io', port: 5001, protocol: 'https'})
 
 class App extends Component {
 
@@ -30,51 +32,105 @@ class App extends Component {
   async loadBlockchainData() {
     
     const web3 = window.web3
-    // console.log("web3")
 
-    //Load account
+    // Load account
     const accounts = await web3.eth.getAccounts()
-    console.log(accounts)
+    this.setState({ account: accounts[0] })
+    
+    // Get network data
+    const networkId = await web3.eth.net.getId()
+    const networkData = DBlocks.networks[networkId]
+    if(networkData) {
+      // Create and assign contract instance
+      const dblocks = new web3.eth.Contract(DBlocks.abi, networkData.address)
+      this.setState({ dblocks })
+      
+      const fileCount = await dblocks.methods.fileCount().call()
+      this.setState({ fileCount })
 
-    //Network ID
-
-    //IF got connection, get data from contracts
-      //Assign contract
-
-      //Get files amount
-
-      //Load files&sort by the newest
-
-    //Else
-      //alert Error
-
+      // Load files and sort by newest
+      for (var i = fileCount; i >= 1; i--) {
+        const file = await dblocks.methods.files(i).call()
+        this.setState({ 
+          files: [...this.state.files, file] 
+        })
+      }
+    } else {
+      window.alert('DBlocks contract not deployed on current network')
+    }
+      this.setState({ loading: false })
   }
 
-  // Get file from user
+  // Get file to upload
   captureFile = event => {
+    event.preventDefault()
+
+    const file = event.target.files[0]
+    const reader = new window.FileReader()
+
+    // Convert file to buffer
+    reader.readAsArrayBuffer(file)
+    reader.onloadend = () => {
+      this.setState({ 
+        buffer: Buffer(reader.result),
+        type: file.type,
+        name: file.name
+       })
+       console.log('buffer', this.state.buffer)
+    }
   }
 
 
   //Upload File
   uploadFile = description => {
+    console.log("Submitting file to IPFS...")
 
     //Add file to the IPFS
+    ipfs.add(this.state.buffer, (err, res) => {
+      console.log('IPFS result', res)
+      if (err) {
+        console.error(err)
+        return
+      }
 
-      //Check If error
-        //Return error
+      this.setState({ loading: true })
+      if(this.state.type === ''){
+        this.setState({ type: 'none' })
+      }
 
-      //Set state to loading
+      //Upload to blockchain
+      this.state.dblocks.methods
+        .uploadFile(res[0].hash, res[0].size, this.state.type, this.state.name, description)
+        .send({ from: this.state.account })
+        .on('transactionHash', (hash) => {
+          this.setState({
+            loading: false,
+            type: null,
+            name: null
+          })
+          window.location.reload()
+        }).on('error', (e) => {
+          window.alert('Error: ' + e.message)
+          this.setState({ loading: false })
+        })
+    })
 
-      //Assign value for the file without extension
+      
 
       //Call smart contract uploadFile function 
 
   }
 
-  //Set states
+  //Set initial states
   constructor(props) {
     super(props)
     this.state = {
+      account: '',
+      dblocks: null,
+      files: [],
+      loading: false,
+      type: null,
+      name: null
     }
 
     //Bind functions
