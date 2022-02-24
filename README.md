@@ -11,5 +11,6 @@ A decentralized clone of Dropbox built on Ethereum and React
 - Smart contracts are managed and deployed using [Truffle](https://trufflesuite.com/)
 - They are then migrated to the Ganache blockchain which executes the network transaction
 - File will be uploaded and stored on the IPFS and can be retrieved using its hash through the following URL `https://ipfs.infura.io/ipfs/{hash}`
+- Sample [screenshot](https://bafybeiedliw6c2qtifcswgihgz7uwqsp7ozgwtefsguj2slkdgn3fuf6kq.ipfs.infura-ipfs.io/)
 
 Reference & starter template: [dstorage](https://github.com/dappuniversity/dstorage) 
